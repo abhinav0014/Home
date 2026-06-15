@@ -120,9 +120,25 @@ fun ConnectedDeviceCard(device: ConnectedDevice) {
             Spacer(modifier = Modifier.width(16.dp))
             
             Column(modifier = Modifier.weight(1f)) {
-                Text(device.name, style = MaterialTheme.typography.titleMedium)
+                val friendlyName = remember(device.name, device.interfaceName) {
+                    if (device.name.startsWith("Device")) {
+                        when {
+                            device.interfaceName.startsWith("wlan") -> "Wireless Device"
+                            device.interfaceName.startsWith("eth") -> "Wired Device"
+                            else -> "Unknown Device"
+                        }
+                    } else device.name
+                }
+                Text(friendlyName, style = MaterialTheme.typography.titleMedium)
+                
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(device.interfaceName.uppercase(), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
+                    val friendlyInterface = when (device.interfaceName.lowercase()) {
+                        "wlan0", "wlan0-1" -> "2.4GHz Wi-Fi"
+                        "wlan1", "wlan1-1" -> "5GHz Wi-Fi"
+                        "eth0" -> "Wired (Ethernet)"
+                        else -> device.interfaceName.lowercase()
+                    }
+                    Text(friendlyInterface, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
                     Text(" • ", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text(device.ip, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }

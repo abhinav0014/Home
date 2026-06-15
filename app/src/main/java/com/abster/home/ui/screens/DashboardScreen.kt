@@ -1,7 +1,9 @@
 package com.abster.home.ui.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -10,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import com.abster.home.domain.model.RouterAbstraction
 import com.abster.home.ui.components.*
@@ -25,6 +28,10 @@ fun DashboardScreen(
     abstraction: RouterAbstraction = RouterAbstraction(),
     isUpdating: Boolean = false
 ) {
+    val configuration = LocalConfiguration.current
+    val isWide = configuration.screenWidthDp > 600
+    val columns = if (isWide) 2 else 1
+
     var bandwidthHistory by remember { mutableStateOf(List(10) { Random.nextFloat() * 50f }) }
     
     LaunchedEffect(Unit) {
@@ -34,49 +41,52 @@ fun DashboardScreen(
         }
     }
 
-    LazyColumn(
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(columns),
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        item {
+        item(span = { GridItemSpan(maxLineSpan) }) {
             NetworkThroughputCard(bandwidthHistory)
         }
 
-        item {
+        item(span = { GridItemSpan(maxLineSpan) }) {
             SectionTitle("Wireless Interfaces")
         }
 
-        item {
-            InterfaceCard(
-                name = abstraction.translate("radio1"),
-                rawId = "radio1",
-                details = "WLAN-5G • 802.11ax",
-                icon = Icons.Default.Wifi,
-                isEnabled = isMain5GEnabled,
-                isUpdating = isUpdating,
-                onToggle = onMain5GToggle
-            )
+        val radioEntries = abstraction.radios.toList()
+        radioEntries.forEach { (id, name) ->
+            item {
+                InterfaceCard(
+                    name = name,
+                    rawId = id,
+                    details = if (id.contains("1")) "Fast Wi-Fi • Best for streaming & gaming" else "Stable Wi-Fi • Long Range",
+                    icon = if (id.startsWith("default")) Icons.Default.WifiOff else Icons.Default.Wifi,
+                    isEnabled = when (id) {
+                        "radio1" -> isMain5GEnabled
+                        "default_radio1" -> isGuestWifiEnabled
+                        else -> true
+                    },
+                    isUpdating = isUpdating,
+                    onToggle = { enabled ->
+                        when (id) {
+                            "radio1" -> onMain5GToggle(enabled)
+                            "default_radio1" -> onGuestWifiToggle(enabled)
+                        }
+                    }
+                )
+            }
         }
 
-        item {
-            InterfaceCard(
-                name = abstraction.translate("default_radio1"),
-                rawId = "guest0",
-                details = "GUEST-WLAN • ISOLATED",
-                icon = Icons.Default.WifiOff,
-                isEnabled = isGuestWifiEnabled,
-                isUpdating = isUpdating,
-                onToggle = onGuestWifiToggle
-            )
-        }
-
-        item {
+        item(span = { GridItemSpan(maxLineSpan) }) {
             SectionTitle("Resources")
         }
 
         item {
+            // TODO: Values should come from parsed stats flow once XHR is real
             ResourceCard(
                 label = "CPU Load",
                 value = "12%",
@@ -86,6 +96,7 @@ fun DashboardScreen(
         }
 
         item {
+            // TODO: Values should come from parsed stats flow once XHR is real
             ResourceCard(
                 label = "RAM Usage",
                 value = "428MB / 1GB",
@@ -95,7 +106,7 @@ fun DashboardScreen(
             )
         }
 
-        item {
+        item(span = { GridItemSpan(maxLineSpan) }) {
             Row(
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -103,15 +114,17 @@ fun DashboardScreen(
             ) {
                 Column {
                     Text("UPTIME", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    // TODO: Value should come from parsed stats flow once XHR is real
                     Text("4d 12h 05m", style = MaterialTheme.typography.bodyMedium)
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Text("TEMP", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    // TODO: Value should come from parsed stats flow once XHR is real
                     Text("42°C", style = MaterialTheme.typography.bodyMedium, color = Color(0xFFEF5350))
                 }
             }
         }
         
-        item { Spacer(modifier = Modifier.height(80.dp)) }
+        item(span = { GridItemSpan(maxLineSpan) }) { Spacer(modifier = Modifier.height(80.dp)) }
     }
 }

@@ -52,6 +52,28 @@ class XHRManager(
     }
 
     private suspend fun fetchRouterStats(): String {
+        /*
+         * REAL API IMPLEMENTATION GUIDE:
+         * To fetch real stats from OpenWrt, you should use Retrofit to hit the 'ubus' endpoint.
+         * 
+         * Endpoint: POST http://<router-ip>/ubus
+         * Body (JSON-RPC 2.0):
+         * {
+         *   "jsonrpc": "2.0",
+         *   "id": 1,
+         *   "method": "call",
+         *   "params": [
+         *     "session_id_here",
+         *     "network.device",
+         *     "status",
+         *     { "name": "eth0" }
+         *   ]
+         * }
+         * 
+         * The response will contain real-time TX/RX bytes, which you can then parse into 
+         * bandwidth Mbps. You would also poll 'system' info for CPU and RAM.
+         */
+
         // Mocking JSON-RPC response
         delay(100) // Simulating network latency
         return """{"bandwidth": "50Mbps", "uptime": "12:34:56", "memory": "256MB"}"""

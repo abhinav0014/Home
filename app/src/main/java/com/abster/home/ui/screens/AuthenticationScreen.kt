@@ -73,7 +73,7 @@ fun AuthenticationScreen(
         OutlinedTextField(
             value = pass,
             onValueChange = { pass = it },
-            label = { Text("SSH Password") },
+            label = { Text("Router Password") },
             modifier = Modifier.fillMaxWidth(),
             visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
@@ -82,6 +82,12 @@ fun AuthenticationScreen(
                 }
             },
             shape = RoundedCornerShape(12.dp)
+        )
+        Text(
+            "This is the password you use to log in to your router admin panel. For OpenWrt, the default username is root with no password.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 8.dp, start = 4.dp, end = 4.dp)
         )
 
         Spacer(modifier = Modifier.weight(1f))

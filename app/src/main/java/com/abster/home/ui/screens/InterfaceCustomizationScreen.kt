@@ -34,7 +34,7 @@ fun InterfaceCustomizationScreen(
                 IconButton(onClick = onBack) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                 }
-                Text("Interface Customization", style = MaterialTheme.typography.titleLarge)
+                Text("Rename Your Networks", style = MaterialTheme.typography.titleLarge)
             }
         }
     ) { padding ->
@@ -47,7 +47,7 @@ fun InterfaceCustomizationScreen(
         ) {
             item {
                 Text(
-                    "Map hardware identifiers to human-friendly names.",
+                    "Give your Wi-Fi bands and ports nicknames so you always know which one is which.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -91,7 +91,7 @@ fun CustomizationItem(id: String, currentLabel: String, onLabelChange: (String) 
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(id, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+            Text("Hardware ID: $id", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
             OutlinedTextField(
                 value = currentLabel,
                 onValueChange = onLabelChange,

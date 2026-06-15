@@ -46,14 +46,14 @@ fun SettingsScreen(
                 Column {
                     SettingsItem(
                         "Router Authentication", 
-                        "Configure OpenWrt SSH credentials", 
+                        "Update your router login details", 
                         Icons.Default.Terminal,
                         onClick = { onTabClick(SettingsTab.ROUTER_AUTH) }
                     )
                     HorizontalDivider(color = MaterialTheme.colorScheme.background.copy(alpha = 0.3f), modifier = Modifier.padding(horizontal = 16.dp))
                     SettingsItem(
                         "Interface Customization", 
-                        "Translate hardware IDs into friendly terms", 
+                        "Rename your Wi-Fi networks and ports to something you'll recognize", 
                         Icons.Default.SettingsSuggest,
                         onClick = { onTabClick(SettingsTab.INTERFACE_CUSTOMIZATION) }
                     )
@@ -130,7 +130,7 @@ fun RouterAuthScreen(
             Text("Router Authentication", style = MaterialTheme.typography.headlineSmall)
         }
         Spacer(modifier = Modifier.height(24.dp))
-        Text("Configure SSH credentials for OpenWrt communication.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text("Enter the login details for your router. You set these up when you first configured your router.", color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(modifier = Modifier.height(32.dp))
         
         OutlinedTextField(
@@ -252,6 +252,29 @@ fun RouterPasswordScreen(onBack: () -> Unit) {
 
 @Composable
 fun SystemRefreshScreen(onBack: () -> Unit) {
+    var showConfirmDialog by remember { mutableStateOf(false) }
+
+    if (showConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showConfirmDialog = false },
+            title = { Text("Reboot your router?") },
+            text = { Text("All devices on your network will lose internet for about 60 seconds while the router restarts.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showConfirmDialog = false
+                    onBack()
+                }) {
+                    Text("Yes, Reboot")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showConfirmDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
     Column(
         modifier = Modifier.fillMaxSize().padding(32.dp).statusBarsPadding(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -273,7 +296,7 @@ fun SystemRefreshScreen(onBack: () -> Unit) {
         )
         Spacer(modifier = Modifier.height(48.dp))
         Button(
-            onClick = onBack,
+            onClick = { showConfirmDialog = true },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp)
         ) {
