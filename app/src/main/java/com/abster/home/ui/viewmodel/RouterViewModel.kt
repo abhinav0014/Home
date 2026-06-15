@@ -18,7 +18,10 @@ class RouterViewModel(
     val stats = repository.stats
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
-    val abstraction = stats.map { repository.getAbstractionMapping(it) }
+    val devices = repository.devices
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val abstraction = stats.map { repository.getAbstractionMapping(null) } // Simplified for now
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), repository.getAbstractionMapping(null))
 
     init {

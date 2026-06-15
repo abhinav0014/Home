@@ -22,33 +22,7 @@ import com.abster.home.ui.components.Header
 import kotlinx.coroutines.delay
 
 @Composable
-fun DevicesListScreen(host: String, user: String, pass: String) {
-    var devices by remember { mutableStateOf(listOf<ConnectedDevice>()) }
-    var isLoading by remember { mutableStateOf(true) }
-    var error by remember { mutableStateOf<String?>(null) }
-
-    LaunchedEffect(host, user, pass) {
-        isLoading = true
-        error = null
-        if (pass.isEmpty()) {
-            delay(1000)
-            devices = listOf(
-                ConnectedDevice("MacBook Pro 16", "192.168.1.15", "00:1A:2B:3C:4D:5E", "wlan0-1", "-45 dBm"),
-                ConnectedDevice("iPhone 15 Pro", "192.168.1.22", "A1:B2:C3:D4:E5:F6", "wlan1-1", "-62 dBm"),
-                ConnectedDevice("Smart TV", "192.168.1.109", "12:34:56:78:90:AB", "eth0"),
-                ConnectedDevice("Pixel 8", "192.168.1.42", "AA:BB:CC:DD:EE:FF", "wlan1-1", "-55 dBm")
-            )
-        } else {
-            val fetched = RouterService.fetchDevices(host, user, pass)
-            if (fetched.isEmpty()) {
-                error = "Could not connect to router or no devices found."
-            } else {
-                devices = fetched
-            }
-        }
-        isLoading = false
-    }
-
+fun DevicesListScreen(devices: List<ConnectedDevice>) {
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -60,20 +34,10 @@ fun DevicesListScreen(host: String, user: String, pass: String) {
             }
         }
 
-        if (isLoading) {
+        if (devices.isEmpty()) {
             item {
                 Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                }
-            }
-        } else if (error != null) {
-            item {
-                Surface(
-                    color = MaterialTheme.colorScheme.errorContainer,
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(error!!, modifier = Modifier.padding(16.dp), color = MaterialTheme.colorScheme.onErrorContainer)
+                    Text("No devices found", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         } else {

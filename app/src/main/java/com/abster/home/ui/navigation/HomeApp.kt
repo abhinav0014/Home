@@ -29,7 +29,7 @@ fun HomeApp(
     val viewModel: RouterViewModel = viewModel(
         factory = object : androidx.lifecycle.ViewModelProvider.Factory {
             override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
-                val xhrManager = XHRManager(scope)
+                val xhrManager = XHRManager(initialHost, initialUser, initialPass, scope)
                 val sshManager = SSHManager(initialHost, 22, initialUser, initialPass)
                 val repository = RouterRepository(xhrManager, sshManager, scope)
                 return RouterViewModel(repository) as T
@@ -40,6 +40,7 @@ fun HomeApp(
     val abstraction by viewModel.abstraction.collectAsState()
     val isUpdating by viewModel.isProcessing.collectAsState()
     val stats by viewModel.stats.collectAsState()
+    val devices by viewModel.devices.collectAsState()
 
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.DASHBOARD) }
     
@@ -127,7 +128,8 @@ fun HomeApp(
                             isGuestWifiEnabled = isGuestWifiEnabled,
                             onGuestWifiToggle = { isGuestWifiEnabled = it; viewModel.onToggleWifi("default_radio1", it) },
                             abstraction = abstraction,
-                            isUpdating = isUpdating
+                            isUpdating = isUpdating,
+                            stats = stats
                         )
                         AppDestinations.CONFIG -> ConfigScreen(
                             selectedMode = selectedOperationMode,
@@ -140,7 +142,7 @@ fun HomeApp(
                             abstraction = abstraction,
                             isUpdating = isUpdating
                         )
-                        AppDestinations.DEVICES -> DevicesListScreen(routerHost, routerUser, routerPass)
+                        AppDestinations.DEVICES -> DevicesListScreen(devices = devices)
                         AppDestinations.SETTINGS -> SettingsScreen(
                             onTabClick = { currentSettingsTab = it },
                             onLogout = onLogout

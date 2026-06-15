@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import com.abster.home.domain.model.RouterAbstraction
+import com.abster.home.model.RouterStats
 import com.abster.home.ui.components.*
 import kotlinx.coroutines.delay
 import kotlin.random.Random
@@ -26,7 +27,8 @@ fun DashboardScreen(
     isGuestWifiEnabled: Boolean,
     onGuestWifiToggle: (Boolean) -> Unit,
     abstraction: RouterAbstraction = RouterAbstraction(),
-    isUpdating: Boolean = false
+    isUpdating: Boolean = false,
+    stats: RouterStats? = null
 ) {
     val configuration = LocalConfiguration.current
     val isWide = configuration.screenWidthDp > 600
@@ -86,21 +88,27 @@ fun DashboardScreen(
         }
 
         item {
-            // TODO: Values should come from parsed stats flow once XHR is real
+            // Values now come from parsed stats flow
+            val cpuLoad = stats?.load?.get(0) ?: 0.0
             ResourceCard(
                 label = "CPU Load",
-                value = "12%",
-                progress = 0.12f,
+                value = "${(cpuLoad * 100).toInt()}%",
+                progress = cpuLoad.toFloat().coerceIn(0f, 1f),
                 icon = Icons.Default.Memory
             )
         }
 
         item {
-            // TODO: Values should come from parsed stats flow once XHR is real
+            // Values now come from parsed stats flow
+            val memTotal = stats?.memoryTotal ?: 1L
+            val memFree = stats?.memoryFree ?: 0L
+            val memUsed = memTotal - memFree
+            val memProgress = if (memTotal > 0) memUsed.toFloat() / memTotal else 0f
+            
             ResourceCard(
                 label = "RAM Usage",
-                value = "428MB / 1GB",
-                progress = 0.428f,
+                value = "${memUsed / 1024 / 1024}MB / ${memTotal / 1024 / 1024}MB",
+                progress = memProgress.coerceIn(0f, 1f),
                 icon = Icons.Default.Storage,
                 progressColor = MaterialTheme.colorScheme.tertiary
             )
@@ -114,13 +122,17 @@ fun DashboardScreen(
             ) {
                 Column {
                     Text("UPTIME", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    // TODO: Value should come from parsed stats flow once XHR is real
-                    Text("4d 12h 05m", style = MaterialTheme.typography.bodyMedium)
+                    // Value now comes from parsed stats flow
+                    val uptime = stats?.uptime ?: 0L
+                    val d = uptime / 86400
+                    val h = (uptime % 86400) / 3600
+                    val m = (uptime % 3600) / 60
+                    Text("${d}d ${h}h ${m}m", style = MaterialTheme.typography.bodyMedium)
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Text("TEMP", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    // TODO: Value should come from parsed stats flow once XHR is real
-                    Text("42°C", style = MaterialTheme.typography.bodyMedium, color = Color(0xFFEF5350))
+                    // Value now comes from parsed stats flow
+                    Text("${stats?.temperature ?: 42.0}°C", style = MaterialTheme.typography.bodyMedium, color = Color(0xFFEF5350))
                 }
             }
         }

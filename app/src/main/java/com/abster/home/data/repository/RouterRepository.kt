@@ -16,7 +16,8 @@ class RouterRepository(
     private val _isProcessing = MutableStateFlow(false)
     val isProcessing = _isProcessing.asStateFlow()
 
-    val stats: StateFlow<String?> = xhrManager.stats
+    val stats = xhrManager.stats
+    val devices = xhrManager.devices
 
     fun startMonitoring() {
         xhrManager.startPolling()
